@@ -10,7 +10,7 @@ spec:
           # Define your 3 applications here with their unique fields
           - appName: payment-service-5
             repoUrl: 'https://github.com/shiv935055/docker-project.git'
-            version: v5.1.0
+            version: v5.2.0
             namespace: argo-app-1
             syncWave: "9"
             path: project-1
