@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-backend-application-set
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          # Define your 3 applications here with their unique fields
+          - appName: payment-service
+            repoUrl: 'https://github.com/shiv935055/docker-project.git'
+            version: v2.0.0
+            namespace: argo-app-1
+            syncWave: "5"
+            path: project-1
+            
+          - appName: user-service
+            repoUrl: 'https://github.com/shiv935055/Argo-app.git'
+            version: v3.0.0
+            namespace: argo-app-2
+            syncWave: "3"
+            path: infra
+  template:
+    metadata:
+      name: '{{appName}}-prod'
+      namespace: argocd
+      labels:
+        env: production
+        tier: backend
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: devops-alerts
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: payment-prod-project
+      source:
+        repoURL: '{{repoUrl}}'
+        targetRevision: '{{version}}'
+        path: '{{path}}'
+      
+      destination:
+        server: ‘https://kubernetes.default.svc'
+        namespace: '{{namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+          - ApplyOutOfSyncOnly=true
+          - RespectIgnoreDifferences=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+            - /spec/template/metadata/annotations/sidecar.istio.io~1status
+        - group: ""
+          kind: Service
+          jsonPointers:
+            - /spec/clusterIP
+            - /spec/clusterIPs
+        - group: networking.k8s.io
+          kind: Ingress
+          jsonPointers:
+            - /status
+        - group: ""
+          kind: ServiceAccount
+          jsonPointers:
+            - /secrets
+
+      revisionHistoryLimit: 5
