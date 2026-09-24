@@ -8,18 +8,18 @@ spec:
     - list:
         elements:
           # Define your 3 applications here with their unique fields
-          - appName: payment-service
+          - appName: payment-service-5
             repoUrl: 'https://github.com/shiv935055/docker-project.git'
-            version: v2.0.0
+            version: v5.0.0
             namespace: argo-app-1
-            syncWave: "5"
+            syncWave: "9"
             path: project-1
             
-          - appName: user-service
+          - appName: user-service-6
             repoUrl: 'https://github.com/shiv935055/Argo-app.git'
-            version: v3.0.0
+            version: v6.0.0
             namespace: argo-app-2
-            syncWave: "3"
+            syncWave: "10"
             path: infra
   template:
     metadata:
